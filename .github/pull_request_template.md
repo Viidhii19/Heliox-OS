@@ -1,24 +1,59 @@
-## 📋 Description
-Brief description of what this PR does.
+## Summary
 
-## 🔗 Related Issue
-Fixes #(issue number)
+<!-- Briefly describe what this PR does and why -->
 
-## 🧪 Type of Change
-- [ ] 🐛 Bug fix (non-breaking change)
-- [ ] ✨ New feature (non-breaking change)
-- [ ] 💥 Breaking change
-- [ ] 📖 Documentation update
-- [ ] ⚙️ CI/CD update
+Closes #<issue_number>
 
-## ✅ Checklist
-- [ ] My code follows the project's style guidelines
-- [ ] I have tested locally on at least one OS
-- [ ] I have added comments where needed
-- [ ] No API keys or secrets are committed
-- [ ] New and existing tests pass
+---
 
-## 📸 Screenshots (if UI change)
-Before | After
---- | ---
- | 
+## Type of change
+
+- [ ] Bug fix
+- [ ] New feature / enhancement
+- [ ] Documentation update
+- [ ] Tests / CI
+- [ ] Performance improvement
+- [ ] Refactor (no functional change)
+
+---
+
+## Changes made
+
+<!-- List the key files/modules changed and what was done -->
+
+-
+-
+
+---
+
+## How to test
+
+<!-- Step-by-step instructions to verify this PR works correctly -->
+
+1.
+2.
+3.
+
+---
+
+## Checklist
+
+- [ ] I have read the [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] My code follows the existing code style
+- [ ] I have added/updated tests where applicable
+- [ ] All existing tests pass (`pytest` for backend, `npm run test` for frontend)
+- [ ] I have updated documentation if needed
+- [ ] I have tested on at least one platform (Windows / macOS / Linux)
+
+---
+
+## Screenshots / recordings (if UI change)
+
+<!-- Drag and drop a screenshot or screen recording here -->
+
+---
+
+## GSSoC declaration
+
+- [ ] This contribution is made under the GSSoC 2026 program
+- [ ] I have not plagiarised code from other repositories
