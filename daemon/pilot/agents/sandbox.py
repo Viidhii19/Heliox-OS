@@ -174,9 +174,7 @@ class SimulationSandbox:
             # Skip TRIBE loading in dry-run mode (synchronous, blocking)
             # Cognitive cost is estimated mathematically instead
             stimulus = f"Execute action {action_type} on {target}"
-            impact.cognitive_cost = min(
-                1.0, len(stimulus) / 80.0 + (0.4 if action_type in HIGH_RISK_ACTIONS else 0.1)
-            )
+            impact.cognitive_cost = min(1.0, len(stimulus) / 80.0 + (0.4 if action_type in HIGH_RISK_ACTIONS else 0.1))
             report.total_cognitive_cost += impact.cognitive_cost
 
             # Classify risk
