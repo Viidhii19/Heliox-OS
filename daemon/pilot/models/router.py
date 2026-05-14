@@ -127,7 +127,12 @@ class ModelRouter:
             if await self._ollama.is_available():
                 model = await self._resolve_ollama_model()
                 response = await self._ollama.generate(
-                    model, prompt, system=system, json_mode=json_mode, temperature=temperature, stream_callback=stream_callback
+                    model,
+                    prompt,
+                    system=system,
+                    json_mode=json_mode,
+                    temperature=temperature,
+                    stream_callback=stream_callback,
                 )
                 if not stream_callback and model:
                     await self._cache.set(prompt, model, provider, temperature, json_mode, response, system)
@@ -144,7 +149,12 @@ class ModelRouter:
         if provider != "ollama" and await self._ollama.is_available():
             model = await self._resolve_ollama_model()
             response = await self._ollama.generate(
-                model, prompt, system=system, json_mode=json_mode, temperature=temperature, stream_callback=stream_callback
+                model,
+                prompt,
+                system=system,
+                json_mode=json_mode,
+                temperature=temperature,
+                stream_callback=stream_callback,
             )
             if not stream_callback and model:
                 await self._cache.set(prompt, model, "ollama", temperature, json_mode, response, system)
