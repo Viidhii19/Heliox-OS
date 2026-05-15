@@ -1950,9 +1950,7 @@ class PilotServer:
 
                 from pilot.system.voice import speak
 
-                await speak(
-                    f"Sorry, I couldn't process that. {plan.error[:100]}"
-                )
+                await speak(f"Sorry, I couldn't process that. {plan.error[:100]}")
                 return
 
             await self._broadcast_notification(
@@ -1979,11 +1977,7 @@ class PilotServer:
                 if r.output:
                     output_parts.append(r.output[:200])
 
-            result_text = (
-                " ".join(output_parts)
-                if output_parts
-                else plan.explanation
-            )
+            result_text = " ".join(output_parts) if output_parts else plan.explanation
 
             status = "success" if verification.passed else "partial"
 
@@ -2000,11 +1994,7 @@ class PilotServer:
             # Speak response
             from pilot.system.voice import speak
 
-            spoken = (
-                result_text[:300]
-                if len(result_text) < 300
-                else result_text[:297] + "..."
-            )
+            spoken = result_text[:300] if len(result_text) < 300 else result_text[:297] + "..."
 
             await speak(spoken)
 
@@ -2027,11 +2017,10 @@ class PilotServer:
             try:
                 from pilot.system.voice import speak
 
-                await speak(
-                    "Sorry, something went wrong while executing your request."
-                )
+                await speak("Sorry, something went wrong while executing your request.")
             except Exception:
                 pass
+
     async def _voice_status_broadcast(self, status: str, data: dict) -> None:
         """Called by ContinuousVoiceListener for status updates.
 
