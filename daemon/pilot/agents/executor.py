@@ -414,7 +414,7 @@ class Executor:
 
             if cancel_event and cancel_event.is_set():
                 logger.info("Executor: cancel_event set — stopping at batch %d", batch_idx)
-                for remaining_batch in batches[batch_idx + 1:]:
+                for remaining_batch in batches[batch_idx + 1 :]:
                     for action in remaining_batch:
                         results.append(
                             ActionResult(action=action, success=False, error="Skipped due to cancel request")

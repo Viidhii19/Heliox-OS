@@ -191,6 +191,7 @@ class PilotServer:
         self._orchestrator = AgentOrchestrator(model_router)
         self._orchestrator.set_broadcast(self._broadcast_notification)
         from pilot.agents.registry import AgentRegistry
+
         AgentRegistry.discover_agents()
         registered = self._orchestrator.auto_register_all_agents(
             executor=self._executor,
