@@ -15,6 +15,7 @@
   import ReActPipeline from "./lib/components/ReActPipeline.svelte";
   import VirtualList from "./lib/components/VirtualList.svelte";
   import PluginsTab from "./lib/components/PluginsTab.svelte";
+  import GitConflictResolver from "./lib/components/GitConflictResolver.svelte";
   import { session } from "./lib/stores/session";
   import type { Message } from "./lib/stores/session";
   import { settings } from "./lib/stores/settings";
@@ -28,18 +29,18 @@
   import ConnectionStatus from "./lib/components/ConnectionStatus.svelte";
 
   const renderer = new marked.Renderer();
-  renderer.code = function(code, language) {
-    const lang = language || "";
-    const result = highlight(code, lang);
+  renderer.code = function({ text, lang }: { text: string; lang?: string }): string {
+    const language = lang || "";
+    const result = highlight(text, language);
     const langLabel = result.language !== "plaintext" ? result.language : "";
     const langBadge = langLabel ? `<span class="hlx-lang-badge">${langLabel}</span>` : "";
-    return `<div class="hlx-code-wrapper"><div class="hlx-code-header">${langBadge}<button class="hlx-copy-btn" data-code="${encodeURIComponent(code)}">Copy</button></div><pre class="hlx-pre"><code class="hljs language-${result.language}">${result.value}</code></pre></div>`;
+    return `<div class="hlx-code-wrapper"><div class="hlx-code-header">${langBadge}<button class="hlx-copy-btn" data-code="${encodeURIComponent(text)}">Copy</button></div><pre class="hlx-pre"><code class="hljs language-${result.language}">${result.value}</code></pre></div>`;
   };
   marked.setOptions({ renderer, gfm: true, breaks: true });
 
-  function renderMarkdown(text) {
+  function renderMarkdown(text: string): string {
     if (!text) return "";
-    const raw = marked.parse(text);
+    const raw = marked.parse(text) as string;
     return DOMPurify.sanitize(raw);
   }
 
@@ -476,6 +477,9 @@
         Copied!
       </span>
     </div>
+
+  {:else if msg.type === "git_conflict" && msg.gitConflict}
+    <GitConflictResolver payload={msg.gitConflict} />
 
   {:else}
     <div class="message system-msg has-copy">

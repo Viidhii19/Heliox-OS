@@ -31,6 +31,7 @@ from pilot.actions import (
     EnvParams,
     FileIntelParams,
     FileParams,
+    GitResolveParams,
     GnomeSettingParams,
     KeyboardParams,
     MouseParams,
@@ -97,6 +98,7 @@ class Executor:
             ActionType.FILE_SEARCH: self._exec_file_search,
             ActionType.DIRECTORY_SUMMARY: self._exec_directory_summary,
             ActionType.FILE_PERMISSIONS: self._exec_file_permissions,
+            ActionType.GIT_RESOLVE: self._exec_git_resolve,
             # -- Package operations --
             ActionType.PACKAGE_INSTALL: self._exec_package_install,
             ActionType.PACKAGE_REMOVE: self._exec_package_remove,
@@ -702,6 +704,20 @@ class Executor:
 
         params: FileParams = action.parameters  # type: ignore[assignment]
         return await file_permissions(params.path, params.permissions)
+
+    async def _exec_git_resolve(self, action: Action) -> str:
+        from pathlib import Path
+
+        params: GitResolveParams = action.parameters  # type: ignore[assignment]
+        p = Path(params.path)
+        if not p.exists():
+            raise FileNotFoundError(f"File not found: {params.path}")
+        content = await asyncio.to_thread(p.read_text, "utf-8")
+        if params.full_block not in content:
+            raise ValueError("Conflict block not found in file. It might have been modified or already resolved.")
+        new_content = content.replace(params.full_block, params.resolved_code)
+        await asyncio.to_thread(p.write_text, new_content, "utf-8")
+        return f"Successfully resolved git conflict in {params.path}"
 
     # ======================================================================
     # PACKAGE OPERATIONS

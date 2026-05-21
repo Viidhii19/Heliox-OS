@@ -95,6 +95,7 @@ class PilotServer:
         self._server: Server | None = None
         self._clients: set[ServerConnection] = set()
         self._handlers: dict[str, Any] = {}
+        self._model_router: Any = None
         self._planner: Any = None
         self._executor: Any = None
         self._verifier: Any = None
@@ -164,6 +165,7 @@ class PilotServer:
 
         self._vault = KeyVault(self.config)
         model_router = ModelRouter(self.config, self._vault)
+        self._model_router = model_router
         await model_router.initialize()
 
         from pilot.models.budget_tracker import BudgetTracker
@@ -432,6 +434,8 @@ class PilotServer:
             # ── LAN Mesh Network ──
             "mesh_peers": self._handle_mesh_peers,
             "mesh_status": self._handle_mesh_status,
+            "resolve_git_conflict": self._handle_resolve_git_conflict,
+            "apply_git_resolution": self._handle_apply_git_resolution,
         }
 
         # ── LAN Mesh Network (opt-in via config) ──
@@ -2936,6 +2940,72 @@ class PilotServer:
         suggestion_id = params.get("suggestion_id", "")
         dismissed = await self._proactive.dismiss_suggestion(suggestion_id)
         return {"dismissed": dismissed, "suggestion_id": suggestion_id}
+
+    async def _handle_resolve_git_conflict(self, params: dict, ws: ServerConnection) -> dict:
+        """Resolve git merge conflicts in a file via LLM.
+
+        Args:
+            params: JSON-RPC parameters containing filepath (or path).
+            ws: The WebSocket connection.
+
+        Returns:
+            A dict with resolution details.
+        """
+        if not self._model_router:
+            return {"status": "error", "message": "Model router not initialized"}
+
+        filepath = params.get("filepath") or params.get("path")
+        if not filepath:
+            return {"status": "error", "message": "Missing filepath or path parameter"}
+
+        try:
+            from pilot.system.git_conflict import resolve_conflicts_in_file
+
+            resolved_blocks = await resolve_conflicts_in_file(filepath, self._model_router)
+            return {"status": "success", "conflicts": resolved_blocks}
+        except Exception as e:
+            logger.exception("Failed to resolve git conflict in handler")
+            return {"status": "error", "message": str(e)}
+
+    async def _handle_apply_git_resolution(self, params: dict, ws: ServerConnection) -> dict:
+        """Apply a git conflict resolution securely.
+
+        Args:
+            params: JSON-RPC parameters with path, full_block, resolved_code.
+            ws: The WebSocket connection.
+
+        Returns:
+            A dict with execution status.
+        """
+        path = params.get("path")
+        full_block = params.get("full_block")
+        resolved_code = params.get("resolved_code")
+
+        if not path or full_block is None or resolved_code is None:
+            return {"status": "error", "message": "Missing required params: path, full_block, resolved_code"}
+
+        try:
+            from pilot.actions import Action, ActionPlan, ActionType, GitResolveParams
+
+            action = Action(
+                action_type=ActionType.GIT_RESOLVE,
+                parameters=GitResolveParams(
+                    path=path,
+                    full_block=full_block,
+                    resolved_code=resolved_code,
+                ),
+            )
+            plan = ActionPlan(actions=[action], explanation="Apply git conflict resolution securely")
+            results = await self._executor.execute(plan)
+            success = all(r.success for r in results)
+            error = next((r.error for r in results if not r.success), None)
+            return {
+                "status": "success" if success else "error",
+                "message": "Git conflict resolved successfully" if success else (error or "Failed to resolve conflict"),
+            }
+        except Exception as e:
+            logger.exception("Failed to apply git conflict resolution in handler")
+            return {"status": "error", "message": str(e)}
 
 
 def _setup_logging() -> None:

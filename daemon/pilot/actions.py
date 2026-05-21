@@ -23,6 +23,7 @@ class ActionType(StrEnum):
     FILE_SEARCH = "file_search"
     DIRECTORY_SUMMARY = "directory_summary"
     FILE_PERMISSIONS = "file_permissions"
+    GIT_RESOLVE = "git_resolve"
 
     # -- Package management --
     PACKAGE_INSTALL = "package_install"
@@ -346,6 +347,12 @@ class FileParams(BaseModel):
     max_entries: int = 200  # For directory_summary
     ignore_dirs: list[str] = Field(default_factory=lambda: [".git", "node_modules"])  # For directory_summary
     permissions: str | None = None  # e.g. "755" for file_permissions
+
+
+class GitResolveParams(BaseModel):
+    path: str = ""
+    full_block: str = ""
+    resolved_code: str = ""
 
 
 class PackageParams(BaseModel):
@@ -766,6 +773,7 @@ ActionParameters = (
     | SshCommandParams
     | SshScriptParams
     | ElementDetectionParams
+    | GitResolveParams
     | EmptyParams
 )
 
@@ -788,6 +796,7 @@ class Action(BaseModel):
         ALWAYS_SAFE = {
             ActionType.FILE_READ,
             ActionType.FILE_WRITE,
+            ActionType.GIT_RESOLVE,
             ActionType.FILE_LIST,
             ActionType.FILE_SEARCH,
             ActionType.FILE_COPY,
