@@ -115,10 +115,14 @@ class ForensicsAgent(BaseAgent):
         # The interception is scheduled as a background task so it never
         # delays the return of forensics results to the caller.
         if self._threat_bridge is not None:
-            asyncio.create_task(
+            if not hasattr(self, "_bg_tasks"):
+                self._bg_tasks = set()
+            task = asyncio.create_task(
                 self._intercept_critical_threats(results),
                 name=f"threat_containment_{str(id(results))[:8]}",
             )
+            self._bg_tasks.add(task)
+            task.add_done_callback(self._bg_tasks.discard)
 
         return results
 

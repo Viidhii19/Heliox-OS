@@ -290,17 +290,14 @@ class TestTranslateResolution:
             assert action.destructive is True
             assert action.permission_tier == PermissionTier.DESTRUCTIVE
 
-    def test_no_pid_fallback_to_shell_command(self):
+    def test_no_pid_generates_no_actions(self):
         bridge = _make_bridge()
         report = ForensicsReport(
             severity="CRITICAL",
             proposed_resolution="Block network interface eth0 immediately",
         )
         plan = bridge.translate_resolution(report)
-        assert len(plan.actions) == 1
-        action = plan.actions[0]
-        assert action.action_type == ActionType.SHELL_COMMAND
-        assert action.destructive is True
+        assert len(plan.actions) == 0
 
     def test_affected_pids_field_used_when_no_pid_in_text(self):
         bridge = _make_bridge()

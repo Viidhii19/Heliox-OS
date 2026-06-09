@@ -346,17 +346,14 @@ class ThreatContainmentBridge:
                 f"{report.incident_type or 'unknown incident'}"
             )
         else:
-            # Fallback: emit the resolution as a shell command
             logger.warning(
                 "[ThreatContainment] No PID found in resolution '%s' — "
-                "falling back to SHELL_COMMAND (user confirmation still required).",
+                "no autonomous actions could be generated.",
                 resolution[:80],
             )
-            actions.append(_build_shell_fallback(resolution))
             explanation = (
-                f"[THREAT CONTAINMENT] Execute mitigation command "
-                f"(no PID identified) — auto-generated from CRITICAL report: "
-                f"{report.incident_type or 'unknown incident'}"
+                f"[THREAT CONTAINMENT] Threat detected but no autonomous actions "
+                f"could be generated: {report.incident_type or 'unknown incident'}"
             )
 
         return ActionPlan(
@@ -554,13 +551,7 @@ class ThreatContainmentBridge:
         plan = self.translate_resolution(report)
         record = ContainmentRecord(report=report, action_plan=plan)
 
-        if not plan.actions:
-            record.error = "No containment actions could be generated from the proposed resolution."
-            logger.error("[ThreatContainment] %s", record.error)
-            await self._audit_containment(report, confirmed=False, results=[], error=record.error)
-            return record
-
-        # Step B — Broadcast alert and request confirmation
+        # Step B — Broadcast alert of critical threat
         if self._broadcast_fn:
             await self._broadcast_fn(
                 "threat_detected",
@@ -572,6 +563,12 @@ class ThreatContainmentBridge:
                     "proposed_resolution": report.proposed_resolution,
                 },
             )
+
+        if not plan.actions:
+            record.error = "No containment actions could be generated from the proposed resolution."
+            logger.error("[ThreatContainment] %s", record.error)
+            await self._audit_containment(report, confirmed=False, results=[], error=record.error)
+            return record
 
         # Step C — Gate + Execute
         confirmed, results = await self.route_and_confirm(plan, report)
