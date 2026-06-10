@@ -328,8 +328,7 @@ class ThreatContainmentBridge:
             )
         else:
             logger.warning(
-                "[ThreatContainment] No PID found in resolution '%s' — "
-                "no autonomous actions could be generated.",
+                "[ThreatContainment] No PID found in resolution '%s' — no autonomous actions could be generated.",
                 resolution[:80],
             )
             explanation = (
