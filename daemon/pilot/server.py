@@ -376,8 +376,7 @@ class PilotServer:
         # ── Threat Containment Bridge (Issue #365) ──
         self._threat_bridge: Any = None
         # ── Authenticated WebSocket clients ──
-        self._authenticated_clients: 
-          set[ServerConnection] = set()
+        self._authenticated_clients: set[ServerConnection] = set()
 
     async def initialize(self) -> None:
         """Initialize all agent components.

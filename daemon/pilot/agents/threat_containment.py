@@ -165,24 +165,6 @@ def _build_kill_action(pid: int) -> Action:
     )
 
 
-def _build_shell_fallback(resolution: str) -> Action:
-    """Build a SHELL_COMMAND action for unrecognised resolutions.
-
-    Used when no PID can be extracted.  The command is intentionally marked
-    ``destructive=True`` to force Security Gate confirmation.
-    """
-    # Sanitize: strip leading/trailing shell-unsafe chars but keep the intent
-    safe_cmd = resolution.strip()[:256]
-    return Action(
-        action_type=ActionType.SHELL_COMMAND,
-        target="threat_mitigation",
-        parameters=ShellCommandParams(command=safe_cmd, args=[], timeout=30),
-        destructive=True,
-        reversible=False,
-        requires_root=False,
-    )
-
-
 # ---------------------------------------------------------------------------
 # ThreatContainmentBridge
 # ---------------------------------------------------------------------------
@@ -324,7 +306,6 @@ class ThreatContainmentBridge:
              one PROCESS_KILL action per PID, all with destructive=True.
           2. If the resolution mentions a service name (stop/disable) →
              SERVICE_STOP + SERVICE_DISABLE actions.
-          3. Fallback → SHELL_COMMAND with the raw resolution string, destructive=True.
 
         Args:
             report: The validated ForensicsReport from the agent output.
